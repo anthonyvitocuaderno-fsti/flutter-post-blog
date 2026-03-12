@@ -8,3 +8,10 @@ class PostDetailRouteArgs {
 
   PostDetailRouteArgs(this.post);
 }
+
+class PostFormRouteArgs {
+  /// When set, the form will behave as an "edit" flow instead of create.
+  final PostModel? post;
+
+  const PostFormRouteArgs({this.post});
+}

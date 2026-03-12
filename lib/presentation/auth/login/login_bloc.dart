@@ -20,17 +20,31 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     final newState = state.copyWith(
-      navigationRoute: RoutePaths.register,
+      navigationRoute: RoutePaths.register,        
+      navigationReplace: true,
+      navigationPredicate: (_) => false,
     );
     emit(newState);
-    emit(newState.copyWith(navigationRoute: null));
+    emit(newState.copyWith(
+      navigationRoute: null,        
+      navigationReplace: false,
+      navigationRemoveUntil: false,
+      navigationPredicate: null,
+    ));
   }
 
   Future<void> _onLoginRequested(
     LoginRequested event,
     Emitter<LoginState> emit,
   ) async {
-    emit(state.copyWith(status: LoginStatus.loading));
+    emit(state.copyWith(
+      status: LoginStatus.loading,
+      navigationRoute: null,
+      navigationArguments: null,
+      navigationReplace: null,
+      navigationRemoveUntil: null,
+      navigationPredicate: null,
+      ));
 
     try {
       await loginUseCase(
@@ -44,9 +58,16 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         status: LoginStatus.success,
         navigationRoute: RoutePaths.dashboard,
         navigationReplace: true,
+        navigationPredicate: (_) => false,
       );
       emit(newState);
-      emit(newState.copyWith(navigationRoute: null, navigationReplace: false));
+      emit(newState.copyWith(
+        status: LoginStatus.initial,
+        navigationRoute: null,        
+        navigationReplace: false,
+        navigationRemoveUntil: false,
+        navigationPredicate: null,
+      ));
     } catch (e) {
       emit(state.copyWith(status: LoginStatus.failure, errorMessage: e.toString()));
     }

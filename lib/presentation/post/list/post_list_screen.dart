@@ -15,35 +15,69 @@ class PostListView extends StatefulWidget {
 }
 
 class _PostListViewState extends State<PostListView> {
+  late final ScrollController _scrollController;
+
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController()..addListener(_onScroll);
     context.read<PostListBloc>().add(const PostListStarted());
+  }
+
+  void _onScroll() {
+    final bloc = context.read<PostListBloc>();
+    final state = bloc.state;
+
+    if (!state.hasMore || state.isLoadingMore) return;
+    if (!_scrollController.hasClients) return;
+
+    final threshold = 200; // pixels from bottom to trigger load more
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+
+    if (maxScroll - currentScroll <= threshold) {
+      bloc.add(const PostListLoadMoreRequested());
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<PostListBloc, PostListState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         final route = state.navigationRoute;
         if (route == null) return;
 
+        final postListBloc = context.read<PostListBloc>();
+        final Future<dynamic>? result;
         if (state.navigationRemoveUntil && state.navigationPredicate != null) {
-          NavigationService.navigateToAndRemoveUntil(
+          result = NavigationService.navigateToAndRemoveUntil(
             route,
             state.navigationPredicate!,
             arguments: state.navigationArguments,
           );
         } else if (state.navigationReplace) {
-          NavigationService.navigateToReplacement(
+          result = NavigationService.navigateToReplacement(
             route,
             arguments: state.navigationArguments,
           );
         } else {
-          NavigationService.navigateTo(
+          result = NavigationService.navigateTo(
             route,
             arguments: state.navigationArguments,
           );
+        }
+
+        final value = await result;
+        if (!mounted) return;
+        if (value == true) {
+          postListBloc.add(const PostListStarted());
         }
       },
       child: BlocBuilder<PostListBloc, PostListState>(
@@ -61,12 +95,21 @@ class _PostListViewState extends State<PostListView> {
           }
 
           return ListView.builder(
-            itemCount: state.posts.length,
+            controller: _scrollController,
+            itemCount: state.posts.length + (state.isLoadingMore ? 1 : 0),
             itemBuilder: (context, index) {
+              if (index >= state.posts.length) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+
               final post = state.posts[index];
               return ListTile(
                 title: Text(post.title),
-                subtitle: Text(post.content),
+                subtitle: Text('By ${post.authorName.isNotEmpty ? post.authorName : 'Unknown'}\n${post.content}'),
+                isThreeLine: true,
                 onTap: () {
                   context.read<PostListBloc>().add(PostSelected(post));
                 },

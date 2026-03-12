@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter_post_blog/presentation/shared/navigation/navigation_service.dart';
+import 'package:flutter_post_blog/presentation/shared/navigation/route_paths.dart';
 
 import 'register_bloc.dart';
 import 'register_event.dart';
@@ -17,7 +18,10 @@ class RegisterScreen extends StatelessWidget {
     final passwordController = TextEditingController();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Register')),
+      appBar: AppBar(
+        title: const Text('Register'),
+        automaticallyImplyLeading: false,
+      ),
       body: BlocListener<RegisterBloc, RegisterState>(
         listener: (context, state) {
           if (state.status == RegisterStatus.failure && state.errorMessage != null) {
@@ -25,6 +29,17 @@ class RegisterScreen extends StatelessWidget {
               ..hideCurrentSnackBar()
               ..showSnackBar(
                 SnackBar(content: Text(state.errorMessage!)),
+              );
+          }
+
+          if (state.status == RegisterStatus.success) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                const SnackBar(
+                  content: Text('Registration successful! Please log in.'),
+                  backgroundColor: Colors.green,
+                  ),
               );
           }
 
@@ -118,6 +133,17 @@ class RegisterScreen extends StatelessWidget {
                                 : const Text('Register'),
                           ),
                           const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () {
+                              // TODO do not bypass Bloc
+                              NavigationService.navigateToAndRemoveUntil(
+                                RoutePaths.login,
+                                (route) => false,
+                              );
+                            },
+                            child: const Text('Already have an account? Log in'),
+                          ),
+                          const Spacer(),
                         ],
                       ),
                     ),

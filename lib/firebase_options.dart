@@ -39,7 +39,7 @@ class DefaultFirebaseOptions {
         );
     }
   }
-
+  // TODO optional: hide somewhere gitignored.
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyBQGB0UXye9xUjOd_1tLA8bD3SVo6grVsc',
     appId: '1:636830999690:web:d9b4151ad2cdef5aa07973',

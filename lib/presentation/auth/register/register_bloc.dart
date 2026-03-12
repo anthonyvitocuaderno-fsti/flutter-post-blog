@@ -18,7 +18,13 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
     RegisterRequested event,
     Emitter<RegisterState> emit,
   ) async {
-    emit(state.copyWith(status: RegisterStatus.loading));
+    emit(state.copyWith(status: RegisterStatus.loading,
+      navigationRoute: null,
+      navigationArguments: null,
+      navigationReplace: null,
+      navigationRemoveUntil: null,
+      navigationPredicate: null,
+      ));
 
     try {
       await registerUseCase(
@@ -31,11 +37,19 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
 
       final newState = state.copyWith(
         status: RegisterStatus.success,
-        navigationRoute: RoutePaths.login,
+        navigationRoute: RoutePaths.login,        
         navigationReplace: true,
+        navigationRemoveUntil: false,
+        navigationPredicate: (_) => false,
       );
       emit(newState);
-      emit(newState.copyWith(navigationRoute: null, navigationReplace: false));
+      emit(newState.copyWith(
+        status: RegisterStatus.initial,
+        navigationRoute: null,        
+        navigationReplace: false,
+        navigationRemoveUntil: false,
+        navigationPredicate: null,
+      ));
     } catch (e) {
       emit(state.copyWith(status: RegisterStatus.failure, errorMessage: e.toString()));
     }

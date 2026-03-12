@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:flutter_post_blog/presentation/post/list/post_list_bloc.dart';
+import 'package:flutter_post_blog/presentation/post/list/post_list_event.dart';
 import 'package:flutter_post_blog/presentation/post/list/post_list_screen.dart';
 import 'package:flutter_post_blog/presentation/shared/navigation/navigation_service.dart';
+import 'package:flutter_post_blog/presentation/shared/navigation/route_paths.dart';
 
 import 'dashboard_bloc.dart';
 import 'dashboard_event.dart';
@@ -18,6 +21,13 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    // Always refresh user state when this screen becomes active.
+    context.read<DashboardBloc>().add(const DashboardStarted());
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -27,29 +37,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<DashboardBloc, DashboardState>(
-      listener: (context, state) {
-        final route = state.navigationRoute;
-        if (route == null) return;
+        listener: (context, state) {
+          final route = state.navigationRoute;
+          if (route == null) return;
 
-        if (state.navigationRemoveUntil && state.navigationPredicate != null) {
-          NavigationService.navigateToAndRemoveUntil(
-            route,
-            state.navigationPredicate!,
-            arguments: state.navigationArguments,
-          );
-        } else if (state.navigationReplace) {
-          NavigationService.navigateToReplacement(
-            route,
-            arguments: state.navigationArguments,
-          );
-        } else {
-          NavigationService.navigateTo(
-            route,
-            arguments: state.navigationArguments,
-          );
-        }
-      },
-      child: Scaffold(
+          if (state.navigationRemoveUntil && state.navigationPredicate != null) {
+            NavigationService.navigateToAndRemoveUntil(
+              route,
+              state.navigationPredicate!,
+              arguments: state.navigationArguments,
+            );
+          } else if (state.navigationReplace) {
+            NavigationService.navigateToReplacement(
+              route,
+              arguments: state.navigationArguments,
+            );
+          } else {
+            NavigationService.navigateTo(
+              route,
+              arguments: state.navigationArguments,
+            );
+          }
+        },
+        child: Scaffold(
         appBar: AppBar(
           title: Builder(builder: (context) {
             final user = context.select((DashboardBloc bloc) => bloc.state.user);
@@ -94,6 +104,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
             BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Tab 3'),
           ],
         ),
+        floatingActionButton: _selectedIndex == 0
+            ? BlocBuilder<DashboardBloc, DashboardState>(
+                builder: (context, state) {
+                  final user = state.user;
+                  if (user == null) return const SizedBox.shrink();
+
+                  return FloatingActionButton(
+                    onPressed: () async {
+                      final postListBloc = context.read<PostListBloc>();
+                      final result = await NavigationService.navigateTo(RoutePaths.createPost);
+                      if (!mounted) return;
+                      if (result == true) {
+                        postListBloc.add(const PostListStarted());
+                      }
+                    },
+                    child: const Icon(Icons.add),
+                  );
+                },
+              )
+            : null,
       ),
     );
   }

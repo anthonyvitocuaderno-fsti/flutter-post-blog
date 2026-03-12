@@ -34,8 +34,8 @@ class LoginState extends Equatable {
     return LoginState(
       status: status ?? this.status,
       errorMessage: errorMessage ?? this.errorMessage,
-      navigationRoute: navigationRoute ?? this.navigationRoute,
-      navigationArguments: navigationArguments ?? this.navigationArguments,
+      navigationRoute: navigationRoute,
+      navigationArguments: navigationArguments,
       navigationReplace: navigationReplace ?? this.navigationReplace,
       navigationRemoveUntil: navigationRemoveUntil ?? this.navigationRemoveUntil,
       navigationPredicate: navigationPredicate ?? this.navigationPredicate,

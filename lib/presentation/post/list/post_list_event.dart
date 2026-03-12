@@ -12,6 +12,10 @@ class PostListStarted extends PostListEvent {
   const PostListStarted();
 }
 
+class PostListLoadMoreRequested extends PostListEvent {
+  const PostListLoadMoreRequested();
+}
+
 class PostSelected extends PostListEvent {
   final PostModel post;
 

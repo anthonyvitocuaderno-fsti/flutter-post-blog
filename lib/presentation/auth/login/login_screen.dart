@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter_post_blog/presentation/shared/navigation/navigation_service.dart';
+import 'package:flutter_post_blog/presentation/shared/navigation/route_paths.dart';
 
 import 'login_bloc.dart';
 import 'login_event.dart';
@@ -16,7 +17,10 @@ class LoginScreen extends StatelessWidget {
     final passwordController = TextEditingController();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(
+        title: const Text('Login'),
+        automaticallyImplyLeading: false,
+      ),
       body: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state.status == LoginStatus.failure && state.errorMessage != null) {
@@ -26,9 +30,9 @@ class LoginScreen extends StatelessWidget {
                 SnackBar(content: Text(state.errorMessage!)),
               );
           }
-
+          // TODO DRY this nav listener for every parent screen
           final route = state.navigationRoute;
-          if (route == null) return;
+          if (route == null || ModalRoute.of(context)?.isCurrent != true) return;
 
           if (state.navigationRemoveUntil && state.navigationPredicate != null) {
             NavigationService.navigateToAndRemoveUntil(
@@ -111,6 +115,17 @@ class LoginScreen extends StatelessWidget {
                             },
                             child: const Text('Create account'),
                           ),
+                          TextButton(
+                            onPressed: () {
+                              // TODO do not bypass Bloc
+                              NavigationService.navigateToAndRemoveUntil(
+                                RoutePaths.dashboard,
+                                (route) => false,
+                              );
+                            },
+                            child: const Text('Continue as guest'),
+                          ),
+                          const Spacer(),
                         ],
                       ),
                     ),
@@ -124,3 +139,4 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
+

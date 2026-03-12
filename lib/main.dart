@@ -7,18 +7,22 @@ import 'core/services/firestore_service.dart';
 import 'data/datasource/local/auth_local_datasource_impl.dart';
 import 'data/datasource/remote/auth_remote_datasource_impl.dart';
 import 'data/repository/auth_repository_impl.dart';
+import 'data/datasource/remote/post_remote_datasource_impl.dart';
 import 'data/repository/post_repository_impl.dart';
 import 'service/firebase_auth_service.dart';
 import 'domain/use_case/auth/get_current_user_use_case.dart';
 import 'domain/use_case/auth/login_use_case.dart';
 import 'domain/use_case/auth/logout_use_case.dart';
-import 'domain/use_case/auth/observe_auth_state_use_case.dart';
 import 'domain/use_case/auth/register_use_case.dart';
-import 'domain/use_case/post/fetch_posts_use_case.dart';
+import 'package:flutter_post_blog/domain/use_case/post/create_post_use_case.dart';
+import 'package:flutter_post_blog/domain/use_case/post/delete_post_use_case.dart';
+import 'package:flutter_post_blog/domain/use_case/post/fetch_posts_use_case.dart';
+import 'package:flutter_post_blog/domain/use_case/post/update_post_use_case.dart';
 import 'presentation/auth/login/login_bloc.dart';
 import 'presentation/auth/register/register_bloc.dart';
 import 'presentation/dashboard/dashboard_bloc.dart';
 import 'presentation/dashboard/dashboard_event.dart';
+import 'presentation/post/form/post_form_bloc.dart';
 import 'presentation/post/list/post_list_bloc.dart';
 import 'presentation/splash/splash_bloc.dart';
 import 'presentation/shared/navigation/app_router.dart';
@@ -45,7 +49,8 @@ Future<void> main() async {
     remoteDataSource: authRemoteDataSource,
   );
 
-  final postRepository = PostRepositoryImpl();
+  final postRemoteDataSource = PostRemoteDataSourceImpl(authService: firebaseAuthService);
+  final postRepository = PostRepositoryImpl(remoteDataSource: postRemoteDataSource);
 
   runApp(MainApp(
     authRepository: authRepository,
@@ -65,8 +70,10 @@ class MainApp extends StatelessWidget {
     final registerUseCase = RegisterUseCase(authRepository);
     final logoutUseCase = LogoutUseCase(authRepository);
     final getCurrentUserUseCase = GetCurrentUserUseCase(authRepository: authRepository);
-    final observeAuthStateUseCase = ObserveAuthStateUseCase(authRepository: authRepository);
     final fetchPostsUseCase = FetchPostsUseCase(postRepository);
+    final createPostUseCase = CreatePostUseCase(postRepository);
+    final updatePostUseCase = UpdatePostUseCase(postRepository);
+    final deletePostUseCase = DeletePostUseCase(postRepository);
 
     return MaterialApp(
       title: 'Flutter Post Blog',
@@ -97,6 +104,13 @@ class MainApp extends StatelessWidget {
             ),
             BlocProvider(
               create: (_) => PostListBloc(fetchPostsUseCase: fetchPostsUseCase),
+            ),
+            BlocProvider(
+              create: (_) => PostFormBloc(
+                createPostUseCase: createPostUseCase,
+                updatePostUseCase: updatePostUseCase,
+                deletePostUseCase: deletePostUseCase,
+              ),
             ),
           ],
           child: child ?? const SizedBox.shrink(),

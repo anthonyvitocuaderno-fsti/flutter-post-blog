@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_post_blog/presentation/auth/login/login_screen.dart';
 import 'package:flutter_post_blog/presentation/auth/register/register_screen.dart';
 import 'package:flutter_post_blog/presentation/dashboard/dashboard_screen.dart';
+import 'package:flutter_post_blog/presentation/post/create/create_post_screen.dart';
 import 'package:flutter_post_blog/presentation/post/detail/post_detail_screen.dart';
 import 'package:flutter_post_blog/presentation/splash/splash_screen.dart';
 
@@ -22,6 +23,11 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const RegisterScreen());
       case RoutePaths.dashboard:
         return MaterialPageRoute(builder: (_) => const DashboardScreen());
+      case RoutePaths.createPost:
+        final args = settings.arguments as PostFormRouteArgs?;
+        return MaterialPageRoute(
+          builder: (_) => CreatePostScreen(existingPost: args?.post),
+        );
       case RoutePaths.postDetail:
         final args = settings.arguments as PostDetailRouteArgs?;
         final post = args?.post;

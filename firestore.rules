@@ -10,13 +10,20 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Posts collection: only authenticated users can read.
+    // Posts collection: anyone (including guests) can read posts.
     match /posts/{postId} {
-      allow read: if request.auth != null;
+      allow read: if true;
 
-      // Only the author can create/update/delete their own posts.
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.authorId;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.authorId;
+      // Only authenticated users can create posts.
+      // Ensure authorId matches their uid and authorName is not empty.
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.authorId
+        && request.resource.data.authorName is string
+        && request.resource.data.authorName != '';
+
+      // Only the original author can update/delete their own posts.
+      allow update, delete: if request.auth != null
+        && request.auth.uid == resource.data.authorId;
     }
   }
 }

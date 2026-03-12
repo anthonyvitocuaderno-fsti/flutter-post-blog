@@ -5,10 +5,10 @@ class PostMapper {
   PostMapper._();
 
   static PostEntityLocal toLocal(PostEntityRemote remote) {
-    return PostEntityLocal(data: remote.data);
+    return PostEntityLocal(data: remote.toJson());
   }
 
   static PostEntityRemote toRemote(PostEntityLocal local) {
-    return PostEntityRemote(data: local.data);
+    return PostEntityRemote.fromJson(local.data);
   }
 }

@@ -11,7 +11,7 @@ class RegisterState extends Equatable {
   final bool navigationReplace;
   final bool navigationRemoveUntil;
   final bool Function(Route<dynamic>)? navigationPredicate;
-
+  // TODO encapsulate all nav params
   const RegisterState({
     this.status = RegisterStatus.initial,
     this.errorMessage,
@@ -34,8 +34,8 @@ class RegisterState extends Equatable {
     return RegisterState(
       status: status ?? this.status,
       errorMessage: errorMessage ?? this.errorMessage,
-      navigationRoute: navigationRoute ?? this.navigationRoute,
-      navigationArguments: navigationArguments ?? this.navigationArguments,
+      navigationRoute: navigationRoute,
+      navigationArguments: navigationArguments,
       navigationReplace: navigationReplace ?? this.navigationReplace,
       navigationRemoveUntil: navigationRemoveUntil ?? this.navigationRemoveUntil,
       navigationPredicate: navigationPredicate ?? this.navigationPredicate,

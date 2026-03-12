@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter_post_blog/core/base/base_usecase.dart';
-import 'package:flutter_post_blog/domain/model/user_model.dart';
 import 'package:flutter_post_blog/domain/use_case/auth/get_current_user_use_case.dart';
 import 'package:flutter_post_blog/presentation/shared/navigation/route_paths.dart';
 import 'splash_event.dart';
@@ -46,8 +45,4 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     }
   }
 
-  @override
-  Future<void> close() {
-    return super.close();
-  }
 }
