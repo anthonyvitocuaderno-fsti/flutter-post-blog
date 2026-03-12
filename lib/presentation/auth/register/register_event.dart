@@ -21,3 +21,7 @@ class RegisterRequested extends RegisterEvent {
   @override
   List<Object?> get props => [name, email, password];
 }
+
+class NavigateToLoginRequested extends RegisterEvent {
+  const NavigateToLoginRequested();
+}

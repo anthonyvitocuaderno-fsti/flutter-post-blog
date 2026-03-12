@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_post_blog/core/base/base_usecase.dart';
 import 'package:flutter_post_blog/domain/use_case/auth/get_current_user_use_case.dart';
 import 'package:flutter_post_blog/domain/use_case/auth/logout_use_case.dart';
+import 'package:flutter_post_blog/presentation/shared/navigation/navigation_params.dart';
 import 'package:flutter_post_blog/presentation/shared/navigation/route_paths.dart';
 import 'dashboard_event.dart';
 import 'dashboard_state.dart';
@@ -17,6 +18,18 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   }) : super(const DashboardState.initial()) {
     on<DashboardStarted>(_onStarted);
     on<DashboardLogoutRequested>(_onLogoutRequested);
+    on<DashboardCreatePostRequested>(_onCreatePostRequested);
+  }
+
+  Future<void> _onCreatePostRequested(
+    DashboardCreatePostRequested event,
+    Emitter<DashboardState> emit,
+  ) async {
+    final newState = state.copyWith(
+      navigationParams: const NavigationParams.push(RoutePaths.createPost),
+    );
+    emit(newState);
+    emit(newState.copyWith(navigationParams: null));
   }
 
   Future<void> _onStarted(DashboardStarted event, Emitter<DashboardState> emit) async {
@@ -42,16 +55,13 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     try {
       await logoutUseCase(const NoParams());
       final newState = const DashboardState.loggedOut().copyWith(
-        navigationRoute: RoutePaths.login,
-        navigationRemoveUntil: true,
-        navigationPredicate: (route) => false,
+        navigationParams: NavigationParams.removeUntil(
+          RoutePaths.login,
+          (route) => false,
+        ),
       );
       emit(newState);
-      emit(newState.copyWith(
-        navigationRoute: null,
-        navigationRemoveUntil: false,
-        navigationPredicate: null,
-      ));
+      emit(newState.copyWith(navigationParams: null));
     } catch (e) {
       emit(DashboardState.failure(e.toString()));
     }

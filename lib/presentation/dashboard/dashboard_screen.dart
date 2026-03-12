@@ -37,29 +37,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<DashboardBloc, DashboardState>(
-        listener: (context, state) {
-          final route = state.navigationRoute;
-          if (route == null) return;
+      listener: (context, state) async {
+        final params = state.navigationParams;
+        final postListBloc = context.read<PostListBloc>();
+        final result = await NavigationService.navigateIfNeeded(params, source: 'DashboardScreen');
+        if (!mounted) return;
 
-          if (state.navigationRemoveUntil && state.navigationPredicate != null) {
-            NavigationService.navigateToAndRemoveUntil(
-              route,
-              state.navigationPredicate!,
-              arguments: state.navigationArguments,
-            );
-          } else if (state.navigationReplace) {
-            NavigationService.navigateToReplacement(
-              route,
-              arguments: state.navigationArguments,
-            );
-          } else {
-            NavigationService.navigateTo(
-              route,
-              arguments: state.navigationArguments,
-            );
-          }
-        },
-        child: Scaffold(
+        if (params?.route == RoutePaths.createPost && result == true) {
+          postListBloc.add(const PostListStarted());
+        }
+      },
+      child: Scaffold(
         appBar: AppBar(
           title: Builder(builder: (context) {
             final user = context.select((DashboardBloc bloc) => bloc.state.user);
@@ -111,13 +99,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   if (user == null) return const SizedBox.shrink();
 
                   return FloatingActionButton(
-                    onPressed: () async {
-                      final postListBloc = context.read<PostListBloc>();
-                      final result = await NavigationService.navigateTo(RoutePaths.createPost);
-                      if (!mounted) return;
-                      if (result == true) {
-                        postListBloc.add(const PostListStarted());
-                      }
+                    onPressed: () {
+                      context.read<DashboardBloc>().add(const DashboardCreatePostRequested());
                     },
                     child: const Icon(Icons.add),
                   );

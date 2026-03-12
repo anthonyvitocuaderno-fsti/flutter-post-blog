@@ -39,3 +39,12 @@ class DeletePostRequested extends PostFormEvent {
   @override
   List<Object?> get props => [id];
 }
+
+class EditPostRequested extends PostFormEvent {
+  final PostModel post;
+
+  const EditPostRequested({required this.post});
+
+  @override
+  List<Object?> get props => [post];
+}

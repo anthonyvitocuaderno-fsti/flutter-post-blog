@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:flutter_post_blog/domain/model/user_model.dart';
+
+import '../shared/navigation/navigation_params.dart';
 
 enum DashboardStatus { initial, loading, loaded, loggedOut, failure }
 
@@ -9,21 +10,13 @@ class DashboardState extends Equatable {
   final DashboardStatus status;
   final UserModel? user;
   final String? errorMessage;
-  final String? navigationRoute;
-  final Object? navigationArguments;
-  final bool navigationReplace;
-  final bool navigationRemoveUntil;
-  final bool Function(Route<dynamic>)? navigationPredicate;
+  final NavigationParams? navigationParams;
 
   const DashboardState({
     required this.status,
     this.user,
     this.errorMessage,
-    this.navigationRoute,
-    this.navigationArguments,
-    this.navigationReplace = false,
-    this.navigationRemoveUntil = false,
-    this.navigationPredicate,
+    this.navigationParams,
   });
 
   const DashboardState.initial() : this(status: DashboardStatus.initial);
@@ -38,33 +31,16 @@ class DashboardState extends Equatable {
     DashboardStatus? status,
     UserModel? user,
     String? errorMessage,
-    String? navigationRoute,
-    Object? navigationArguments,
-    bool? navigationReplace,
-    bool? navigationRemoveUntil,
-    bool Function(Route<dynamic>)? navigationPredicate,
+    NavigationParams? navigationParams,
   }) {
     return DashboardState(
       status: status ?? this.status,
       user: user ?? this.user,
       errorMessage: errorMessage ?? this.errorMessage,
-      navigationRoute: navigationRoute,
-      navigationArguments: navigationArguments,
-      navigationReplace: navigationReplace ?? this.navigationReplace,
-      navigationRemoveUntil: navigationRemoveUntil ?? this.navigationRemoveUntil,
-      navigationPredicate: navigationPredicate ?? this.navigationPredicate,
+      navigationParams: navigationParams,
     );
   }
 
   @override
-  List<Object?> get props => [
-        status,
-        user,
-        errorMessage,
-        navigationRoute,
-        navigationArguments,
-        navigationReplace,
-        navigationRemoveUntil,
-        navigationPredicate,
-      ];
+  List<Object?> get props => [status, user, errorMessage, navigationParams];
 }

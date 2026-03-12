@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter_post_blog/presentation/shared/navigation/navigation_service.dart';
-import 'package:flutter_post_blog/presentation/shared/navigation/route_paths.dart';
 
 import 'login_bloc.dart';
 import 'login_event.dart';
@@ -30,27 +29,8 @@ class LoginScreen extends StatelessWidget {
                 SnackBar(content: Text(state.errorMessage!)),
               );
           }
-          // TODO DRY this nav listener for every parent screen
-          final route = state.navigationRoute;
-          if (route == null || ModalRoute.of(context)?.isCurrent != true) return;
 
-          if (state.navigationRemoveUntil && state.navigationPredicate != null) {
-            NavigationService.navigateToAndRemoveUntil(
-              route,
-              state.navigationPredicate!,
-              arguments: state.navigationArguments,
-            );
-          } else if (state.navigationReplace) {
-            NavigationService.navigateToReplacement(
-              route,
-              arguments: state.navigationArguments,
-            );
-          } else {
-            NavigationService.navigateTo(
-              route,
-              arguments: state.navigationArguments,
-            );
-          }
+          NavigationService.navigateIfNeeded(state.navigationParams, source: 'LoginScreen');
         },
         child: BlocBuilder<LoginBloc, LoginState>(
           builder: (context, state) {
@@ -117,11 +97,7 @@ class LoginScreen extends StatelessWidget {
                           ),
                           TextButton(
                             onPressed: () {
-                              // TODO do not bypass Bloc
-                              NavigationService.navigateToAndRemoveUntil(
-                                RoutePaths.dashboard,
-                                (route) => false,
-                              );
+                              context.read<LoginBloc>().add(const ContinueAsGuestRequested());
                             },
                             child: const Text('Continue as guest'),
                           ),

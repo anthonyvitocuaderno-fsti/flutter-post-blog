@@ -20,3 +20,7 @@ class LoginRequested extends LoginEvent {
 class NavigateToRegisterRequested extends LoginEvent {
   const NavigateToRegisterRequested();
 }
+
+class ContinueAsGuestRequested extends LoginEvent {
+  const ContinueAsGuestRequested();
+}

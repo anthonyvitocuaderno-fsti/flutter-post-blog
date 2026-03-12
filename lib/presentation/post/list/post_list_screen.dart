@@ -51,32 +51,10 @@ class _PostListViewState extends State<PostListView> {
   Widget build(BuildContext context) {
     return BlocListener<PostListBloc, PostListState>(
       listener: (context, state) async {
-        final route = state.navigationRoute;
-        if (route == null) return;
-
         final postListBloc = context.read<PostListBloc>();
-        final Future<dynamic>? result;
-        if (state.navigationRemoveUntil && state.navigationPredicate != null) {
-          result = NavigationService.navigateToAndRemoveUntil(
-            route,
-            state.navigationPredicate!,
-            arguments: state.navigationArguments,
-          );
-        } else if (state.navigationReplace) {
-          result = NavigationService.navigateToReplacement(
-            route,
-            arguments: state.navigationArguments,
-          );
-        } else {
-          result = NavigationService.navigateTo(
-            route,
-            arguments: state.navigationArguments,
-          );
-        }
-
-        final value = await result;
+        final result = await NavigationService.navigateIfNeeded(state.navigationParams, source: 'PostListView');
         if (!mounted) return;
-        if (value == true) {
+        if (result == true) {
           postListBloc.add(const PostListStarted());
         }
       },

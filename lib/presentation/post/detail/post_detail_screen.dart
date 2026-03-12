@@ -7,8 +7,6 @@ import 'package:flutter_post_blog/presentation/post/form/post_form_bloc.dart';
 import 'package:flutter_post_blog/presentation/post/form/post_form_event.dart';
 import 'package:flutter_post_blog/presentation/post/form/post_form_state.dart';
 import 'package:flutter_post_blog/presentation/shared/navigation/navigation_service.dart';
-import 'package:flutter_post_blog/presentation/shared/navigation/route_arguments.dart';
-import 'package:flutter_post_blog/presentation/shared/navigation/route_paths.dart';
 
 class PostDetailScreen extends StatefulWidget {
   const PostDetailScreen({super.key, required this.post});
@@ -25,16 +23,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     return currentUserId != null && currentUserId == widget.post.authorId;
   }
 
-  void _onEditPressed() async {
-    final result = await NavigationService.navigateTo(
-      RoutePaths.createPost,
-      arguments: PostFormRouteArgs(post: widget.post),
-    );
-
-    if (result == true) {
-      // Refresh list on return.
-      NavigationService.pop(true);
-    }
+  void _onEditPressed() {
+    context.read<PostFormBloc>().add(EditPostRequested(post: widget.post));
   }
 
   Future<void> _onDeletePressed() async {
@@ -66,7 +56,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<PostFormBloc, PostFormState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state.status == PostFormStatus.success) {
           NavigationService.pop(true);
         }
@@ -76,6 +66,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             SnackBar(content: Text(state.errorMessage ?? 'Unable to delete post.')),
           );
         }
+
+        await NavigationService.navigateIfNeeded(state.navigationParams, source: 'PostDetailScreen');
       },
       child: Scaffold(
         appBar: AppBar(

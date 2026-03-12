@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_post_blog/domain/use_case/auth/login_use_case.dart';
 import 'package:flutter_post_blog/domain/value_objects/email.dart';
 import 'package:flutter_post_blog/domain/value_objects/password.dart';
+import 'package:flutter_post_blog/presentation/shared/navigation/navigation_params.dart';
 import 'package:flutter_post_blog/presentation/shared/navigation/route_paths.dart';
 import 'login_event.dart';
 import 'login_state.dart';
@@ -13,6 +14,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({required this.loginUseCase}) : super(const LoginState()) {
     on<LoginRequested>(_onLoginRequested);
     on<NavigateToRegisterRequested>(_onNavigateToRegisterRequested);
+    on<ContinueAsGuestRequested>(_onContinueAsGuestRequested);
   }
 
   Future<void> _onNavigateToRegisterRequested(
@@ -20,17 +22,24 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     final newState = state.copyWith(
-      navigationRoute: RoutePaths.register,        
-      navigationReplace: true,
-      navigationPredicate: (_) => false,
+      navigationParams: const NavigationParams.replace(RoutePaths.register),
     );
     emit(newState);
-    emit(newState.copyWith(
-      navigationRoute: null,        
-      navigationReplace: false,
-      navigationRemoveUntil: false,
-      navigationPredicate: null,
-    ));
+    emit(newState.copyWith(navigationParams: null));
+  }
+
+  Future<void> _onContinueAsGuestRequested(
+    ContinueAsGuestRequested event,
+    Emitter<LoginState> emit,
+  ) async {
+    final newState = state.copyWith(
+      navigationParams: NavigationParams.removeUntil(
+        RoutePaths.dashboard,
+        (_) => false,
+      ),
+    );
+    emit(newState);
+    emit(newState.copyWith(navigationParams: null));
   }
 
   Future<void> _onLoginRequested(
@@ -39,12 +48,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   ) async {
     emit(state.copyWith(
       status: LoginStatus.loading,
-      navigationRoute: null,
-      navigationArguments: null,
-      navigationReplace: null,
-      navigationRemoveUntil: null,
-      navigationPredicate: null,
-      ));
+      navigationParams: null,
+    ));
 
     try {
       await loginUseCase(
@@ -56,18 +61,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
       final newState = state.copyWith(
         status: LoginStatus.success,
-        navigationRoute: RoutePaths.dashboard,
-        navigationReplace: true,
-        navigationPredicate: (_) => false,
+        navigationParams: NavigationParams.removeUntil(
+          RoutePaths.dashboard,
+          (_) => false,
+        ),
       );
       emit(newState);
-      emit(newState.copyWith(
-        status: LoginStatus.initial,
-        navigationRoute: null,        
-        navigationReplace: false,
-        navigationRemoveUntil: false,
-        navigationPredicate: null,
-      ));
+      emit(newState.copyWith(status: LoginStatus.initial, navigationParams: null));
     } catch (e) {
       emit(state.copyWith(status: LoginStatus.failure, errorMessage: e.toString()));
     }

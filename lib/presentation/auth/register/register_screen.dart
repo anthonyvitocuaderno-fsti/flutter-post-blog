@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter_post_blog/presentation/shared/navigation/navigation_service.dart';
-import 'package:flutter_post_blog/presentation/shared/navigation/route_paths.dart';
 
 import 'register_bloc.dart';
 import 'register_event.dart';
@@ -43,26 +42,7 @@ class RegisterScreen extends StatelessWidget {
               );
           }
 
-          final route = state.navigationRoute;
-          if (route == null) return;
-
-          if (state.navigationRemoveUntil && state.navigationPredicate != null) {
-            NavigationService.navigateToAndRemoveUntil(
-              route,
-              state.navigationPredicate!,
-              arguments: state.navigationArguments,
-            );
-          } else if (state.navigationReplace) {
-            NavigationService.navigateToReplacement(
-              route,
-              arguments: state.navigationArguments,
-            );
-          } else {
-            NavigationService.navigateTo(
-              route,
-              arguments: state.navigationArguments,
-            );
-          }
+          NavigationService.navigateIfNeeded(state.navigationParams, source: 'RegisterScreen');
         },
         child: BlocBuilder<RegisterBloc, RegisterState>(
           builder: (context, state) {
@@ -135,11 +115,7 @@ class RegisterScreen extends StatelessWidget {
                           const SizedBox(height: 16),
                           TextButton(
                             onPressed: () {
-                              // TODO do not bypass Bloc
-                              NavigationService.navigateToAndRemoveUntil(
-                                RoutePaths.login,
-                                (route) => false,
-                              );
+                              context.read<RegisterBloc>().add(const NavigateToLoginRequested());
                             },
                             child: const Text('Already have an account? Log in'),
                           ),

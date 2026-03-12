@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'core/utils/app_bloc_observer.dart';
+
 import 'firebase_options.dart';
 import 'core/services/firestore_service.dart';
 import 'data/datasource/local/auth_local_datasource_impl.dart';
@@ -32,6 +34,7 @@ import 'presentation/shared/navigation/route_paths.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Bloc.observer = AppBlocObserver();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

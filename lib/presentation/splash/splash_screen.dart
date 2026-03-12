@@ -25,26 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return BlocListener<SplashBloc, SplashState>(
       listener: (context, state) {
-        final route = state.navigationRoute;
-        if (route == null) return;
-
-        if (state.navigationRemoveUntil && state.navigationPredicate != null) {
-          NavigationService.navigateToAndRemoveUntil(
-            route,
-            state.navigationPredicate!,
-            arguments: state.navigationArguments,
-          );
-        } else if (state.navigationReplace) {
-          NavigationService.navigateToReplacement(
-            route,
-            arguments: state.navigationArguments,
-          );
-        } else {
-          NavigationService.navigateTo(
-            route,
-            arguments: state.navigationArguments,
-          );
-        }
+        NavigationService.navigateIfNeeded(state.navigationParams, source: 'SplashScreen');
       },
       child: Scaffold(
         body: const Center(

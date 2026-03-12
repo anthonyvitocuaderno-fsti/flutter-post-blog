@@ -15,3 +15,7 @@ class DashboardLogoutRequested extends DashboardEvent {
   const DashboardLogoutRequested();
 }
 
+class DashboardCreatePostRequested extends DashboardEvent {
+  const DashboardCreatePostRequested();
+}
+

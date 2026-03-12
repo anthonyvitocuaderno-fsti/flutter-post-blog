@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter_post_blog/domain/use_case/post/fetch_posts_use_case.dart';
+import 'package:flutter_post_blog/presentation/shared/navigation/navigation_params.dart';
 import 'package:flutter_post_blog/presentation/shared/navigation/route_arguments.dart';
 import 'package:flutter_post_blog/presentation/shared/navigation/route_paths.dart';
 import 'post_list_event.dart';
@@ -21,11 +22,13 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
     Emitter<PostListState> emit,
   ) async {
     final newState = state.copyWith(
-      navigationRoute: RoutePaths.postDetail,
-      navigationArguments: PostDetailRouteArgs(event.post),
+      navigationParams: NavigationParams.push(
+        RoutePaths.postDetail,
+        arguments: PostDetailRouteArgs(event.post),
+      ),
     );
     emit(newState);
-    emit(newState.copyWith(navigationRoute: null, navigationArguments: null));
+    emit(newState.copyWith(navigationParams: null));
   }
 
   Future<void> _onStarted(PostListStarted event, Emitter<PostListState> emit) async {
