@@ -1,26 +1,20 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
 import 'core/utils/app_bloc_observer.dart';
-
+import 'di/di_setup.dart';
 import 'firebase_options.dart';
-import 'core/services/firestore_service.dart';
-import 'data/datasource/local/auth_local_datasource_impl.dart';
-import 'data/datasource/remote/auth_remote_datasource_impl.dart';
-import 'data/repository/auth_repository_impl.dart';
-import 'data/datasource/remote/post_remote_datasource_impl.dart';
-import 'data/repository/post_repository_impl.dart';
-import 'service/firebase_auth_service.dart';
 import 'domain/use_case/auth/get_current_user_use_case.dart';
 import 'domain/use_case/auth/login_use_case.dart';
 import 'domain/use_case/auth/logout_use_case.dart';
 import 'domain/use_case/auth/register_use_case.dart';
-import 'package:flutter_post_blog/domain/use_case/post/create_post_use_case.dart';
-import 'package:flutter_post_blog/domain/use_case/post/delete_post_use_case.dart';
-import 'package:flutter_post_blog/domain/use_case/post/fetch_posts_use_case.dart';
-import 'package:flutter_post_blog/domain/use_case/post/update_post_use_case.dart';
-import 'package:flutter_post_blog/domain/use_case/post/watch_posts_use_case.dart';
+import 'domain/use_case/post/create_post_use_case.dart';
+import 'domain/use_case/post/delete_post_use_case.dart';
+import 'domain/use_case/post/fetch_posts_use_case.dart';
+import 'domain/use_case/post/update_post_use_case.dart';
+import 'domain/use_case/post/watch_posts_use_case.dart';
 import 'presentation/auth/login/login_bloc.dart';
 import 'presentation/auth/register/register_bloc.dart';
 import 'presentation/dashboard/dashboard_bloc.dart';
@@ -32,7 +26,6 @@ import 'presentation/shared/navigation/app_router.dart';
 import 'presentation/shared/navigation/navigation_service.dart';
 import 'presentation/shared/navigation/route_paths.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Bloc.observer = AppBlocObserver();
@@ -40,46 +33,17 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  final firestore = FirestoreService.instance;
-  final firebaseAuthService = FirebaseAuthService();
+  // Setup dependency injection
+  setupDI();
 
-  final authRemoteDataSource = AuthRemoteDataSourceImpl(
-    firestore: firestore,
-    authService: firebaseAuthService,
-  );
-  final authLocalDataSource = AuthLocalDataSourceImpl();
-  final authRepository = AuthRepositoryImpl(
-    localDataSource: authLocalDataSource,
-    remoteDataSource: authRemoteDataSource,
-  );
-
-  final postRemoteDataSource = PostRemoteDataSourceImpl(authService: firebaseAuthService);
-  final postRepository = PostRepositoryImpl(remoteDataSource: postRemoteDataSource);
-
-  runApp(MainApp(
-    authRepository: authRepository,
-    postRepository: postRepository,
-  ));
+  runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key, required this.authRepository, required this.postRepository});
-
-  final AuthRepositoryImpl authRepository;
-  final PostRepositoryImpl postRepository;
+  const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final loginUseCase = LoginUseCase(authRepository);
-    final registerUseCase = RegisterUseCase(authRepository);
-    final logoutUseCase = LogoutUseCase(authRepository);
-    final getCurrentUserUseCase = GetCurrentUserUseCase(authRepository: authRepository);
-    final fetchPostsUseCase = FetchPostsUseCase(postRepository);
-    final watchPostsUseCase = WatchPostsUseCase(postRepository);
-    final createPostUseCase = CreatePostUseCase(postRepository);
-    final updatePostUseCase = UpdatePostUseCase(postRepository);
-    final deletePostUseCase = DeletePostUseCase(postRepository);
-
     return MaterialApp(
       title: 'Flutter Post Blog',
       theme: ThemeData(primarySwatch: Colors.blue),
@@ -92,32 +56,36 @@ class MainApp extends StatelessWidget {
           providers: [
             BlocProvider(
               create: (_) => SplashBloc(
-                getCurrentUserUseCase: getCurrentUserUseCase
+                getCurrentUserUseCase: GetIt.instance.get<GetCurrentUserUseCase>(),
               ),
             ),
             BlocProvider(
-              create: (_) => LoginBloc(loginUseCase: loginUseCase),
+              create: (_) => LoginBloc(
+                loginUseCase: GetIt.instance.get<LoginUseCase>(),
+              ),
             ),
             BlocProvider(
-              create: (_) => RegisterBloc(registerUseCase: registerUseCase),
+              create: (_) => RegisterBloc(
+                registerUseCase: GetIt.instance.get<RegisterUseCase>(),
+              ),
             ),
             BlocProvider(
               create: (_) => DashboardBloc(
-                getCurrentUserUseCase: getCurrentUserUseCase,
-                logoutUseCase: logoutUseCase,
+                getCurrentUserUseCase: GetIt.instance.get<GetCurrentUserUseCase>(),
+                logoutUseCase: GetIt.instance.get<LogoutUseCase>(),
               )..add(const DashboardStarted()),
             ),
             BlocProvider(
               create: (_) => PostListBloc(
-                fetchPostsUseCase: fetchPostsUseCase,
-                watchPostsUseCase: watchPostsUseCase,
+                fetchPostsUseCase: GetIt.instance.get<FetchPostsUseCase>(),
+                watchPostsUseCase: GetIt.instance.get<WatchPostsUseCase>(),
               ),
             ),
             BlocProvider(
               create: (_) => PostFormBloc(
-                createPostUseCase: createPostUseCase,
-                updatePostUseCase: updatePostUseCase,
-                deletePostUseCase: deletePostUseCase,
+                createPostUseCase: GetIt.instance.get<CreatePostUseCase>(),
+                updatePostUseCase: GetIt.instance.get<UpdatePostUseCase>(),
+                deletePostUseCase: GetIt.instance.get<DeletePostUseCase>(),
               ),
             ),
           ],
