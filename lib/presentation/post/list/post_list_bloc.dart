@@ -11,8 +11,10 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
   final FetchPostsUseCase fetchPostsUseCase;
   static const _pageSize = 20;
 
-  PostListBloc({required this.fetchPostsUseCase}) : super(const PostListState.initial()) {
+  PostListBloc({required this.fetchPostsUseCase})
+    : super(const PostListState.initial()) {
     on<PostListStarted>(_onStarted);
+    on<PostListUpdated>(_onPostsUpdated);
     on<PostListLoadMoreRequested>(_onLoadMoreRequested);
     on<PostSelected>(_onPostSelected);
   }
@@ -31,21 +33,47 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
     emit(newState.copyWith(navigationParams: null));
   }
 
-  Future<void> _onStarted(PostListStarted event, Emitter<PostListState> emit) async {
+  Future<void> _onStarted(
+    PostListStarted event,
+    Emitter<PostListState> emit,
+  ) async {
     emit(const PostListState(status: PostListStatus.loading));
 
     try {
       final posts = await fetchPostsUseCase(const FetchPostsUseCaseParams());
       final lastUpdatedAt = posts.isNotEmpty ? posts.last.updatedAt : null;
-      emit(PostListState(
+      emit(
+        PostListState(
+          status: PostListStatus.success,
+          posts: posts,
+          hasMore: posts.length >= _pageSize,
+          lastUpdatedAt: lastUpdatedAt,
+        ),
+      );
+    } catch (e) {
+      emit(
+        PostListState(
+          status: PostListStatus.failure,
+          errorMessage: e.toString(),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onPostsUpdated(
+    PostListUpdated event,
+    Emitter<PostListState> emit,
+  ) async {
+    final posts = event.posts;
+    final lastUpdatedAt = posts.isNotEmpty ? posts.last.updatedAt : null;
+    emit(
+      state.copyWith(
         status: PostListStatus.success,
         posts: posts,
-        hasMore: posts.length >= _pageSize,
+        hasMore: state.hasMore,
         lastUpdatedAt: lastUpdatedAt,
-      ));
-    } catch (e) {
-      emit(PostListState(status: PostListStatus.failure, errorMessage: e.toString()));
-    }
+      ),
+    );
   }
 
   Future<void> _onLoadMoreRequested(
@@ -65,18 +93,19 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
       );
 
       final combined = [...state.posts, ...nextPosts];
-      final lastUpdatedAt = combined.isNotEmpty ? combined.last.updatedAt : null;
-      emit(state.copyWith(
-        posts: combined,
-        hasMore: nextPosts.length >= _pageSize,
-        lastUpdatedAt: lastUpdatedAt,
-        isLoadingMore: false,
-      ));
+      final lastUpdatedAt = combined.isNotEmpty
+          ? combined.last.updatedAt
+          : null;
+      emit(
+        state.copyWith(
+          posts: combined,
+          hasMore: nextPosts.length >= _pageSize,
+          lastUpdatedAt: lastUpdatedAt,
+          isLoadingMore: false,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        isLoadingMore: false,
-        errorMessage: e.toString(),
-      ));
+      emit(state.copyWith(isLoadingMore: false, errorMessage: e.toString()));
     }
   }
 }

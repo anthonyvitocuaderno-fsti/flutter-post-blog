@@ -12,6 +12,15 @@ class PostListStarted extends PostListEvent {
   const PostListStarted();
 }
 
+class PostListUpdated extends PostListEvent {
+  final List<PostModel> posts;
+
+  const PostListUpdated(this.posts);
+
+  @override
+  List<Object?> get props => [posts];
+}
+
 class PostListLoadMoreRequested extends PostListEvent {
   const PostListLoadMoreRequested();
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:flutter_post_blog/core/utils/date_util.dart';
 import 'package:flutter_post_blog/domain/model/post_model.dart';
 import 'package:flutter_post_blog/presentation/dashboard/dashboard_bloc.dart';
 import 'package:flutter_post_blog/presentation/post/form/post_form_bloc.dart';
@@ -19,7 +20,9 @@ class PostDetailScreen extends StatefulWidget {
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
   bool get _isOwner {
-    final currentUserId = context.select((DashboardBloc bloc) => bloc.state.user?.id);
+    final currentUserId = context.select(
+      (DashboardBloc bloc) => bloc.state.user?.id,
+    );
     return currentUserId != null && currentUserId == widget.post.authorId;
   }
 
@@ -32,7 +35,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete post'),
-        content: const Text('Are you sure you want to delete this post? This action cannot be undone.'),
+        content: const Text(
+          'Are you sure you want to delete this post? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -63,11 +68,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
         if (state.status == PostFormStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage ?? 'Unable to delete post.')),
+            SnackBar(
+              content: Text(state.errorMessage ?? 'Unable to delete post.'),
+            ),
           );
         }
 
-        await NavigationService.navigateIfNeeded(state.navigationParams, source: 'PostDetailScreen');
+        await NavigationService.navigateIfNeeded(
+          state.navigationParams,
+          source: 'PostDetailScreen',
+        );
       },
       child: Scaffold(
         appBar: AppBar(
@@ -98,14 +108,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Updated ${widget.post.updatedAt.toLocal()}',
+                'Updated ${DateUtil.formatDateTime(widget.post.updatedAt.toLocal())}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: SingleChildScrollView(
-                  child: Text(widget.post.content),
-                ),
+                child: SingleChildScrollView(child: Text(widget.post.content)),
               ),
             ],
           ),
