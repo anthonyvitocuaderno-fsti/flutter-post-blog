@@ -21,6 +21,16 @@ class PostListUpdated extends PostListEvent {
   List<Object?> get props => [posts];
 }
 
+class PostListSubscriptionError extends PostListEvent {
+  final Object error;
+  final StackTrace? stackTrace;
+
+  const PostListSubscriptionError(this.error, [this.stackTrace]);
+
+  @override
+  List<Object?> get props => [error, stackTrace];
+}
+
 class PostListLoadMoreRequested extends PostListEvent {
   const PostListLoadMoreRequested();
 }

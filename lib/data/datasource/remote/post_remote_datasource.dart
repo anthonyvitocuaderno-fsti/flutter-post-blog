@@ -11,6 +11,11 @@ abstract class PostRemoteDataSource {
     int limit = 20,
   });
 
+  /// Watches a stream of posts ordered by `updatedAt` descending.
+  Stream<List<PostEntityRemote>> watchPosts({
+    int limit = 20,
+  });
+
   /// Fetch a single post by its document ID.
   Future<PostEntityRemote?> fetchPostById(String id);
 

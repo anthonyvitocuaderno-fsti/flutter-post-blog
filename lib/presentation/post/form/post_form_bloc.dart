@@ -29,7 +29,9 @@ class PostFormBloc extends Bloc<PostFormEvent, PostFormState> {
     EditPostRequested event,
     Emitter<PostFormState> emit,
   ) async {
+    // TODO check many other states not properly resetting to initial after success or navigation.
     final newState = state.copyWith(
+      status: PostFormStatus.initial,
       navigationParams: NavigationParams.push(
         RoutePaths.createPost,
         arguments: PostFormRouteArgs(post: event.post),

@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:flutter_post_blog/domain/model/post_model.dart';
 import 'package:flutter_post_blog/domain/use_case/post/fetch_posts_use_case.dart';
+import 'package:flutter_post_blog/domain/use_case/post/watch_posts_use_case.dart';
 import 'package:flutter_post_blog/presentation/shared/navigation/navigation_params.dart';
 import 'package:flutter_post_blog/presentation/shared/navigation/route_arguments.dart';
 import 'package:flutter_post_blog/presentation/shared/navigation/route_paths.dart';
@@ -9,12 +13,19 @@ import 'post_list_state.dart';
 
 class PostListBloc extends Bloc<PostListEvent, PostListState> {
   final FetchPostsUseCase fetchPostsUseCase;
+  final WatchPostsUseCase watchPostsUseCase;
   static const _pageSize = 20;
 
-  PostListBloc({required this.fetchPostsUseCase})
-    : super(const PostListState.initial()) {
+  StreamSubscription<List<PostModel>>? _postsSubscription;
+  int _currentLimit = _pageSize;
+
+  PostListBloc({
+    required this.fetchPostsUseCase,
+    required this.watchPostsUseCase,
+  }) : super(const PostListState.initial()) {
     on<PostListStarted>(_onStarted);
     on<PostListUpdated>(_onPostsUpdated);
+    on<PostListSubscriptionError>(_onSubscriptionError);
     on<PostListLoadMoreRequested>(_onLoadMoreRequested);
     on<PostSelected>(_onPostSelected);
   }
@@ -39,25 +50,8 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
   ) async {
     emit(const PostListState(status: PostListStatus.loading));
 
-    try {
-      final posts = await fetchPostsUseCase(const FetchPostsUseCaseParams());
-      final lastUpdatedAt = posts.isNotEmpty ? posts.last.updatedAt : null;
-      emit(
-        PostListState(
-          status: PostListStatus.success,
-          posts: posts,
-          hasMore: posts.length >= _pageSize,
-          lastUpdatedAt: lastUpdatedAt,
-        ),
-      );
-    } catch (e) {
-      emit(
-        PostListState(
-          status: PostListStatus.failure,
-          errorMessage: e.toString(),
-        ),
-      );
-    }
+    _currentLimit = _pageSize;
+    await _startListening();
   }
 
   Future<void> _onPostsUpdated(
@@ -72,6 +66,18 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
         posts: posts,
         hasMore: state.hasMore,
         lastUpdatedAt: lastUpdatedAt,
+      ),
+    );
+  }
+
+  Future<void> _onSubscriptionError(
+    PostListSubscriptionError event,
+    Emitter<PostListState> emit,
+  ) async {
+    emit(
+      PostListState(
+        status: PostListStatus.failure,
+        errorMessage: event.error.toString(),
       ),
     );
   }
@@ -96,6 +102,10 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
       final lastUpdatedAt = combined.isNotEmpty
           ? combined.last.updatedAt
           : null;
+
+      _currentLimit = combined.length;
+      await _startListening();
+
       emit(
         state.copyWith(
           posts: combined,
@@ -107,5 +117,21 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
     } catch (e) {
       emit(state.copyWith(isLoadingMore: false, errorMessage: e.toString()));
     }
+  }
+
+  Future<void> _startListening() async {
+    await _postsSubscription?.cancel();
+    _postsSubscription = watchPostsUseCase(
+      WatchPostsUseCaseParams(limit: _currentLimit),
+    ).listen(
+      (posts) => add(PostListUpdated(posts)),
+      onError: (error, stackTrace) => add(PostListSubscriptionError(error, stackTrace)),
+    );
+  }
+
+  @override
+  Future<void> close() async {
+    await _postsSubscription?.cancel();
+    return super.close();
   }
 }

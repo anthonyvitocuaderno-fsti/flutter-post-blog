@@ -60,6 +60,22 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   }
 
   @override
+  Stream<List<PostEntityRemote>> watchPosts({
+    int limit = 20,
+  }) {
+    final query = _postsRef.orderBy('updatedAt', descending: true).limit(limit);
+
+    return query.snapshots().map((snapshot) {
+      return snapshot.docs
+          .map((doc) => PostEntityRemote.fromJson({
+                'id': doc.id,
+                ...doc.data(),
+              }))
+          .toList();
+    });
+  }
+
+  @override
   Future<PostEntityRemote?> fetchPostById(String id) async {
     try {
       final doc = await _postsRef.doc(id).get();

@@ -46,6 +46,37 @@ class PostRepositoryImpl extends BaseRepository implements PostRepository {
   }
 
   @override
+  Stream<List<PostModel>> watchPosts({int limit = 20}) {
+    return remoteDataSource.watchPosts(limit: limit).map(
+      (remotePosts) => remotePosts
+          .map((remote) {
+            final updatedAt = remote.updatedAt;
+            final createdAt = remote.createdAt;
+
+            return PostModel(
+              id: remote.id,
+              title: remote.title,
+              content: remote.content,
+              authorId: remote.authorId,
+              authorName: remote.authorName,
+              createdAt: (createdAt is DateTime)
+                  ? createdAt
+                  : (createdAt is Timestamp)
+                      ? createdAt.toDate()
+                      : DateTime.fromMillisecondsSinceEpoch(0),
+              updatedAt: (updatedAt is DateTime)
+                  ? updatedAt
+                  : (updatedAt is Timestamp)
+                      ? updatedAt.toDate()
+                      : DateTime.fromMillisecondsSinceEpoch(0),
+              imageUrl: remote.imageUrl,
+            );
+          })
+          .toList(),
+    );
+  }
+
+  @override
   Future<PostModel> getPostById(String id) async {
     final remote = await remoteDataSource.fetchPostById(id);
     if (remote == null) {

@@ -20,6 +20,7 @@ import 'package:flutter_post_blog/domain/use_case/post/create_post_use_case.dart
 import 'package:flutter_post_blog/domain/use_case/post/delete_post_use_case.dart';
 import 'package:flutter_post_blog/domain/use_case/post/fetch_posts_use_case.dart';
 import 'package:flutter_post_blog/domain/use_case/post/update_post_use_case.dart';
+import 'package:flutter_post_blog/domain/use_case/post/watch_posts_use_case.dart';
 import 'presentation/auth/login/login_bloc.dart';
 import 'presentation/auth/register/register_bloc.dart';
 import 'presentation/dashboard/dashboard_bloc.dart';
@@ -74,6 +75,7 @@ class MainApp extends StatelessWidget {
     final logoutUseCase = LogoutUseCase(authRepository);
     final getCurrentUserUseCase = GetCurrentUserUseCase(authRepository: authRepository);
     final fetchPostsUseCase = FetchPostsUseCase(postRepository);
+    final watchPostsUseCase = WatchPostsUseCase(postRepository);
     final createPostUseCase = CreatePostUseCase(postRepository);
     final updatePostUseCase = UpdatePostUseCase(postRepository);
     final deletePostUseCase = DeletePostUseCase(postRepository);
@@ -106,7 +108,10 @@ class MainApp extends StatelessWidget {
               )..add(const DashboardStarted()),
             ),
             BlocProvider(
-              create: (_) => PostListBloc(fetchPostsUseCase: fetchPostsUseCase),
+              create: (_) => PostListBloc(
+                fetchPostsUseCase: fetchPostsUseCase,
+                watchPostsUseCase: watchPostsUseCase,
+              ),
             ),
             BlocProvider(
               create: (_) => PostFormBloc(
