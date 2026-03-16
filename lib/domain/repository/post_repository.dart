@@ -5,7 +5,7 @@ abstract class PostRepository extends BaseRepository {
   Future<List<PostModel>> getPosts({DateTime? startAfter, int limit = 20});
   Stream<List<PostModel>> watchPosts({int limit = 20});
   Future<PostModel> getPostById(String id);
-  Future<String> createPost({required String title, required String content});
+  Future<String> createPost({required String title, required String content, String? imageUrl});
   Future<void> updatePost(PostModel post);
   Future<void> deletePost(String id);
 }

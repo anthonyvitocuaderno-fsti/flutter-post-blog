@@ -8,6 +8,12 @@ import 'package:flutter_post_blog/presentation/post/form/post_form_bloc.dart';
 import 'package:flutter_post_blog/presentation/post/form/post_form_event.dart';
 import 'package:flutter_post_blog/presentation/post/form/post_form_state.dart';
 import 'package:flutter_post_blog/presentation/shared/navigation/navigation_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
+import 'image_picker_bloc.dart';
+import 'image_picker_event.dart';
+import 'image_picker_state.dart';
+import 'package:app_settings/app_settings.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key, this.existingPost});
@@ -45,6 +51,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     final postTitle = PostTitle(title);
     final postContent = PostContent(content);
 
+    final imagePickerState = context.read<ImagePickerBloc>().state;
+    final imageUrl = imagePickerState is ImageUploaded ? imagePickerState.imageUrl : widget.existingPost?.imageUrl;
+
     if (!postTitle.isValid() || !postContent.isValid()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Title and content are required.')),
@@ -59,11 +68,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               post: post,
               title: postTitle,
               content: postContent,
+              imageUrl: imageUrl,
             ),
           );
     } else {
       context.read<PostFormBloc>().add(
-            CreatePostRequested(title: postTitle, content: postContent),
+            CreatePostRequested(title: postTitle, content: postContent, imageUrl: imageUrl),
           );
     }
   }
@@ -72,6 +82,50 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     final post = widget.existingPost;
     if (post == null) return;
     context.read<PostFormBloc>().add(DeletePostRequested(id: post.id));
+  }
+
+  void _showImageSourceDialog(BuildContext context) async {
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pick Image'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, ImageSource.gallery),
+            child: const Text('Gallery'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, ImageSource.camera),
+            child: const Text('Camera'),
+          ),
+        ],
+      ),
+    );
+    if (source != null) {
+      context.read<ImagePickerBloc>().add(PickImage(source));
+    }
+  }
+
+  void _showPermissionDialog(BuildContext context, String message, {required bool isPermanentlyDenied}) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Permission Required'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('Ok'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -88,17 +142,33 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             ),
         ],
       ),
-      body: BlocListener<PostFormBloc, PostFormState>(
-        listener: (context, state) {
-          if (state.status == PostFormStatus.success) {
-            NavigationService.pop(true);
-          } else if (state.status == PostFormStatus.failure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage ?? 'Something went wrong')),
-            );
-          }
-        },
-        child: Padding(
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<PostFormBloc, PostFormState>(listener: (context, state) {
+            if (state.status == PostFormStatus.success) {
+              NavigationService.pop(true);
+            } else if (state.status == PostFormStatus.failure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.errorMessage ?? 'Something went wrong')),
+              );
+            }
+          }),
+          BlocListener<ImagePickerBloc, ImagePickerState>(
+          listener: (context, state) {
+            if (state is PermissionDenied) {
+              _showPermissionDialog(context, state.errorMessage, isPermanentlyDenied: false);
+            } else if (state is PermissionPermanentlyDenied) {
+              _showPermissionDialog(context, state.errorMessage, isPermanentlyDenied: true);
+            } else if (state is ImageSelected) {
+              context.read<ImagePickerBloc>().add(UploadImage(state.imageFile));
+            } else if (state is ImageUploadError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.errorMessage)),
+              );
+            }
+          })
+        ],
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -108,19 +178,55 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 decoration: const InputDecoration(labelText: 'Title'),
               ),
               const SizedBox(height: 12),
-              Expanded(
-                child: TextField(
-                  controller: _contentController,
-                  decoration: const InputDecoration(labelText: 'Content'),
-                  maxLines: null,
-                  expands: true,
-                  textAlignVertical: TextAlignVertical.top,
+              Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  BlocBuilder<ImagePickerBloc, ImagePickerState>(
+                    builder: (context, state) {
+                      return CachedNetworkImage(
+                imageUrl: state is ImageUploaded ? state.imageUrl : widget.existingPost?.imageUrl ?? 'https://placehold.co/600x315/jpg', 
+                width: 600,
+                height: 315,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  height: 300,
+                  color: Colors.grey[300],
+                  child: 
+                      state is ImageUploading ?
+                        const Center(child: CircularProgressIndicator())
+                      : const Center(child: Icon(Icons.image, size: 50, color: Colors.white))
+                      
                 ),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.error, color: Colors.red,),
+                )
+              );
+                    }
+                  ),
+                  
+                  ElevatedButton(
+                    onPressed: () {
+                      _showImageSourceDialog(context);
+                  },
+  child: Text("Upload Image"),
+)
+                ],
+                
+              ),
+              
+              const SizedBox(height: 12),
+              TextField(
+                controller: _contentController,
+                decoration: const InputDecoration(labelText: 'Content'),
+                maxLines: 10,
+                textAlignVertical: TextAlignVertical.top,
               ),
               const SizedBox(height: 16),
               BlocBuilder<PostFormBloc, PostFormState>(
                 builder: (context, state) {
-                  final isLoading = state.status == PostFormStatus.loading;
+                  final imagePickerState = context.read<ImagePickerBloc>().state;
+                  final isLoading = state.status == PostFormStatus.loading || imagePickerState is ImageUploading;
                   return ElevatedButton(
                     onPressed: isLoading ? null : _onSubmit,
                     child: Text(_isEditing ? 'Save changes' : 'Create post'),
@@ -132,5 +238,5 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         ),
       ),
     );
-  }
+}
 }

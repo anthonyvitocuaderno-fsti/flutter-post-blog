@@ -90,7 +90,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   }
 
   @override
-  Future<String> createPost({required String title, required String content}) async {
+  Future<String> createPost({required String title, required String content, String? imageUrl}) async {
     final uid = _currentUserId();
     final authorName = await _currentUserName();
 
@@ -102,7 +102,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         'authorName': authorName,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
-        'imageUrl': null,
+        'imageUrl': imageUrl,
       });
       return docRef.id;
     } catch (e) {
@@ -128,6 +128,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     required String id,
     required String title,
     required String content,
+    String? imageUrl,
   }) async {
     await _verifyOwnership(id);
 
@@ -135,6 +136,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       await _postsRef.doc(id).update({
         'title': title,
         'content': content,
+        'imageUrl': imageUrl,
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {

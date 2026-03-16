@@ -13,22 +13,24 @@ abstract class PostFormEvent extends Equatable {
 class CreatePostRequested extends PostFormEvent {
   final PostTitle title;
   final PostContent content;
+  final String? imageUrl;
 
-  const CreatePostRequested({required this.title, required this.content});
+  const CreatePostRequested({required this.title, required this.content, this.imageUrl});
 
   @override
-  List<Object?> get props => [title, content];
+  List<Object?> get props => [title, content, imageUrl];
 }
 
 class UpdatePostRequested extends PostFormEvent {
   final PostModel post;
   final PostTitle title;
   final PostContent content;
+  final String? imageUrl;
 
-  const UpdatePostRequested({required this.post, required this.title, required this.content});
+  const UpdatePostRequested({required this.post, required this.title, required this.content, this.imageUrl});
 
   @override
-  List<Object?> get props => [post, title, content];
+  List<Object?> get props => [post, title, content, imageUrl];
 }
 
 class DeletePostRequested extends PostFormEvent {

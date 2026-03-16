@@ -24,6 +24,7 @@ abstract class PostRemoteDataSource {
   Future<String> createPost({
     required String title,
     required String content,
+    String? imageUrl,
   });
 
   /// Update a post owned by the current user.
@@ -31,6 +32,7 @@ abstract class PostRemoteDataSource {
     required String id,
     required String title,
     required String content,
+    String? imageUrl,
   });
 
   /// Delete a post owned by the current user.

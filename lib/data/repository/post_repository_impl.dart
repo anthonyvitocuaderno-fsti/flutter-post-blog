@@ -107,8 +107,8 @@ class PostRepositoryImpl extends BaseRepository implements PostRepository {
   }
 
   @override
-  Future<String> createPost({required String title, required String content}) async {
-    return remoteDataSource.createPost(title: title, content: content);
+  Future<String> createPost({required String title, required String content, String? imageUrl}) async {
+    return remoteDataSource.createPost(title: title, content: content, imageUrl: imageUrl);
   }
 
   @override
@@ -117,6 +117,7 @@ class PostRepositoryImpl extends BaseRepository implements PostRepository {
       id: post.id,
       title: post.title,
       content: post.content,
+      imageUrl: post.imageUrl,
     );
   }
 

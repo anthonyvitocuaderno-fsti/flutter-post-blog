@@ -21,6 +21,7 @@ import 'presentation/dashboard/dashboard_bloc.dart';
 import 'presentation/dashboard/dashboard_event.dart';
 import 'presentation/post/form/post_form_bloc.dart';
 import 'presentation/post/list/post_list_bloc.dart';
+import 'presentation/post/create/image_picker_bloc.dart';
 import 'presentation/splash/splash_bloc.dart';
 import 'presentation/shared/navigation/app_router.dart';
 import 'presentation/shared/navigation/navigation_service.dart';
@@ -87,6 +88,9 @@ class MainApp extends StatelessWidget {
                 updatePostUseCase: GetIt.instance.get<UpdatePostUseCase>(),
                 deletePostUseCase: GetIt.instance.get<DeletePostUseCase>(),
               ),
+            ),
+            BlocProvider(
+              create: (_) => ImagePickerBloc(),
             ),
           ],
           child: child ?? const SizedBox.shrink(),

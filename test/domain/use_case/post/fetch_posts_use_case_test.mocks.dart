@@ -77,11 +77,13 @@ class MockPostRepository extends _i1.Mock implements _i3.PostRepository {
   _i4.Future<String> createPost({
     required String? title,
     required String? content,
+    String? imageUrl,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#createPost, [], {
               #title: title,
               #content: content,
+              #imageUrl: imageUrl,
             }),
             returnValue: _i4.Future<String>.value(
               _i5.dummyValue<String>(
@@ -89,6 +91,7 @@ class MockPostRepository extends _i1.Mock implements _i3.PostRepository {
                 Invocation.method(#createPost, [], {
                   #title: title,
                   #content: content,
+                  #imageUrl: imageUrl,
                 }),
               ),
             ),

@@ -8,6 +8,7 @@ import 'package:flutter_post_blog/presentation/post/form/post_form_bloc.dart';
 import 'package:flutter_post_blog/presentation/post/form/post_form_event.dart';
 import 'package:flutter_post_blog/presentation/post/form/post_form_state.dart';
 import 'package:flutter_post_blog/presentation/shared/navigation/navigation_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class PostDetailScreen extends StatefulWidget {
   const PostDetailScreen({super.key, required this.post});
@@ -113,7 +114,30 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: SingleChildScrollView(child: Text(widget.post.content)),
+                child: SingleChildScrollView(child: 
+                Column(children: [
+                  CachedNetworkImage(
+                imageUrl: widget.post.imageUrl ?? 'https://placehold.co/600x315/jpg', 
+                width: 600,
+                height: 315,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  height: 300,
+                  color: Colors.grey[300],
+                  child: 
+                    
+                        const Center(child: CircularProgressIndicator())
+                      
+              
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.error, color: Colors.red,),
+                )
+              ),
+                  Text(widget.post.content)
+                ])
+                  ),
               ),
             ],
           ),

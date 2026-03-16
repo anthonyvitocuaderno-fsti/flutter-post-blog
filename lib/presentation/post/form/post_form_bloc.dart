@@ -52,6 +52,7 @@ class PostFormBloc extends Bloc<PostFormEvent, PostFormState> {
         CreatePostUseCaseParams(
           title: event.title,
           content: event.content,
+          imageUrl: event.imageUrl,
         ),
       );
       emit(const PostFormState(status: PostFormStatus.success));
@@ -72,6 +73,7 @@ class PostFormBloc extends Bloc<PostFormEvent, PostFormState> {
           post: event.post,
           title: event.title,
           content: event.content,
+          imageUrl: event.imageUrl,
         ),
       );
       emit(const PostFormState(status: PostFormStatus.success));

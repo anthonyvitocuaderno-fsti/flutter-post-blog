@@ -7,8 +7,9 @@ import 'package:flutter_post_blog/domain/value_objects/post_title.dart';
 class CreatePostUseCaseParams {
   final PostTitle title;
   final PostContent content;
+  final String? imageUrl;
 
-  const CreatePostUseCaseParams({required this.title, required this.content});
+  const CreatePostUseCaseParams({required this.title, required this.content, this.imageUrl});
 }
 
 class CreatePostUseCase extends BaseUseCase<String, CreatePostUseCaseParams> {
@@ -21,6 +22,7 @@ class CreatePostUseCase extends BaseUseCase<String, CreatePostUseCaseParams> {
     return repository.createPost(
       title: params.title.value,
       content: params.content.value,
+      imageUrl: params.imageUrl,
     );
   }
 }

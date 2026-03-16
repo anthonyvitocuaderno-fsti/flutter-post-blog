@@ -15,6 +15,7 @@ class UpdatePostUseCase extends BaseUseCase<void, UpdatePostUseCaseParams> {
     final updatedPost = params.post.copyWith(
       title: params.title.value,
       content: params.content.value,
+      imageUrl: params.imageUrl,
     );
     return repository.updatePost(updatedPost);
   }
@@ -24,6 +25,7 @@ class UpdatePostUseCaseParams {
   final PostModel post;
   final PostTitle title;
   final PostContent content;
+  final String? imageUrl;
 
-  UpdatePostUseCaseParams({required this.post, required this.title, required this.content});
+  UpdatePostUseCaseParams({required this.post, required this.title, required this.content, this.imageUrl});
 }
