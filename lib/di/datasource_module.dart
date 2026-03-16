@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_post_blog/core/services/firebase_storage_service.dart';
 import 'package:get_it/get_it.dart';
 
 import '../core/services/firestore_service.dart';
@@ -16,6 +17,7 @@ void setupDataSources() {
   // Services
   getIt.registerLazySingleton(() => FirestoreService.instance);
   getIt.registerLazySingleton(() => FirebaseAuthService());
+  getIt.registerLazySingleton(() => FirebaseStorageService());
 
   // DataSources
   getIt.registerLazySingleton<AuthRemoteDataSource>(
@@ -26,6 +28,9 @@ void setupDataSources() {
   );
   getIt.registerLazySingleton<AuthLocalDataSource>(() => AuthLocalDataSourceImpl());
   getIt.registerLazySingleton<PostRemoteDataSource>(
-    () => PostRemoteDataSourceImpl(authService: getIt<FirebaseAuthService>()),
+    () => PostRemoteDataSourceImpl(
+      authService: getIt<FirebaseAuthService>(),
+      storageService: getIt<FirebaseStorageService>(),
+    ),
   );
 }

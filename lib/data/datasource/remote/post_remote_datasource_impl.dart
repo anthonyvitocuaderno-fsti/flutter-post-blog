@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_post_blog/core/services/firebase_storage_service.dart';
 
 import '../../../core/exceptions/api_exception.dart';
 import '../../../core/services/firestore_service.dart';
@@ -10,9 +11,10 @@ import 'dart:io';
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   static const _collection = 'posts';
 
+  final FirebaseStorageService storageService;
   final FirebaseAuthService authService;
 
-  PostRemoteDataSourceImpl({required this.authService});
+  PostRemoteDataSourceImpl({required this.authService, required this.storageService});
 
   CollectionReference<Map<String, dynamic>> get _postsRef =>
       FirestoreService.instance.collection(_collection);
@@ -159,6 +161,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   @override
   Future<String> uploadImage(File imageFile) async {
     // TODO implement image upload using Firebase Storage
+    //String imageUrl =awaitstorageService.uploadFile(imageFile, 'posts/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}');
     String random = DateTime.now().microsecondsSinceEpoch.toString();
     return 'https://placehold.co/1200x630/jpg?text=${random}';
   }
@@ -166,6 +169,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   @override
   Future<void> deleteImage(String imageUrl) async {
     // TODO implement image deletion using Firebase Storage
+    //await storageService.deleteFile(imageUrl);
     return;
   }
 }
