@@ -146,6 +146,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         listeners: [
           BlocListener<PostFormBloc, PostFormState>(listener: (context, state) {
             if (state.status == PostFormStatus.success) {
+              context.read<ImagePickerBloc>().add(ImageSaved(oldImageUrl:widget.existingPost?.imageUrl));
               NavigationService.pop(true);
             } else if (state.status == PostFormStatus.failure) {
               ScaffoldMessenger.of(context).showSnackBar(

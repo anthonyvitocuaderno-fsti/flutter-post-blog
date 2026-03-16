@@ -1,3 +1,5 @@
+import 'package:flutter_post_blog/domain/use_case/post/delete_image_use_case.dart';
+import 'package:flutter_post_blog/domain/use_case/post/upload_image_use_case.dart';
 import 'package:get_it/get_it.dart';
 
 import '../domain/repository/auth_repository.dart';
@@ -44,5 +46,12 @@ void setupUseCases() {
   );
   getIt.registerLazySingleton(
     () => WatchPostsUseCase(getIt<PostRepository>()),
+  );
+  
+  getIt.registerLazySingleton(
+    () => UploadImageUseCase(getIt<PostRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => DeleteImageUseCase(getIt<PostRepository>()),
   );
 }

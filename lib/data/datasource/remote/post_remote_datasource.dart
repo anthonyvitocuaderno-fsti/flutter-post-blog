@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../entity/remote/post_entity_remote.dart';
@@ -37,4 +39,7 @@ abstract class PostRemoteDataSource {
 
   /// Delete a post owned by the current user.
   Future<void> deletePost(String id);
+
+  Future<String> uploadImage(File imageFile);
+  Future<void> deleteImage(String imageUrl);
 }

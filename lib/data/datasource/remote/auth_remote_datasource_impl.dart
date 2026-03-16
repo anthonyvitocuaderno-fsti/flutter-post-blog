@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/exceptions/api_exception.dart';
 import '../../../core/utils/logger.dart';
 import '../../entity/remote/user_entity_remote.dart';
-import '../../../service/firebase_auth_service.dart';
+import '../../../core/services/firebase_auth_service.dart';
 import 'auth_remote_datasource.dart';
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {

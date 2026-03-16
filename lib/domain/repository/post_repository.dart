@@ -1,5 +1,6 @@
 import 'package:flutter_post_blog/core/base/base_repository.dart';
 import 'package:flutter_post_blog/domain/model/post_model.dart';
+import 'dart:io';
 
 abstract class PostRepository extends BaseRepository {
   Future<List<PostModel>> getPosts({DateTime? startAfter, int limit = 20});
@@ -8,4 +9,6 @@ abstract class PostRepository extends BaseRepository {
   Future<String> createPost({required String title, required String content, String? imageUrl});
   Future<void> updatePost(PostModel post);
   Future<void> deletePost(String id);
+  Future<void> deleteImage(String imageUrl);
+  Future<String> uploadImage(File file);
 }

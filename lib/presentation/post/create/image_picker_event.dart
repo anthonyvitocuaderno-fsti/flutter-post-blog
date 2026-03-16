@@ -26,3 +26,10 @@ class UploadImage extends ImagePickerEvent {
   @override
   List<Object?> get props => [imageFile];
 }
+class ImageSaved extends ImagePickerEvent {
+  final String? oldImageUrl;
+  const ImageSaved({this.oldImageUrl});
+
+  @override
+  List<Object?> get props => [oldImageUrl];
+}

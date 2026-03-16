@@ -2,9 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../core/exceptions/api_exception.dart';
 import '../../../core/services/firestore_service.dart';
-import '../../../service/firebase_auth_service.dart';
+import '../../../core/services/firebase_auth_service.dart';
 import '../../entity/remote/post_entity_remote.dart';
 import 'post_remote_datasource.dart';
+import 'dart:io';
 
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   static const _collection = 'posts';
@@ -153,5 +154,18 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     } catch (e) {
       throw ApiException(e.toString());
     }
+  }
+
+  @override
+  Future<String> uploadImage(File imageFile) async {
+    // TODO implement image upload using Firebase Storage
+    String random = DateTime.now().microsecondsSinceEpoch.toString();
+    return 'https://placehold.co/1200x630/jpg?text=${random}';
+  }
+
+  @override
+  Future<void> deleteImage(String imageUrl) async {
+    // TODO implement image deletion using Firebase Storage
+    return;
   }
 }

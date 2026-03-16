@@ -3,4 +3,6 @@ class AppConstants {
 
   static const String appName = 'FlutterPostBlog';
   static const String apiBaseUrl = 'https://api.example.com';
+
+  // TODO placeholder, .....
 }

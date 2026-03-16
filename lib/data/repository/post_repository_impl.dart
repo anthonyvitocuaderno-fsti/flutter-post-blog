@@ -4,6 +4,7 @@ import '../../core/base/base_repository.dart';
 import '../../domain/model/post_model.dart';
 import '../../domain/repository/post_repository.dart';
 import '../datasource/remote/post_remote_datasource.dart';
+import 'dart:io';
 
 class PostRepositoryImpl extends BaseRepository implements PostRepository {
   final PostRemoteDataSource remoteDataSource;
@@ -124,5 +125,15 @@ class PostRepositoryImpl extends BaseRepository implements PostRepository {
   @override
   Future<void> deletePost(String id) async {
     await remoteDataSource.deletePost(id);
+  }
+
+  @override
+  Future<void> deleteImage(String imageUrl) async {
+     await remoteDataSource.deleteImage(imageUrl);
+  }
+
+  @override
+  Future<String> uploadImage(File file) async {
+    return remoteDataSource.uploadImage(file); 
   }
 }

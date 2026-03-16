@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_post_blog/domain/use_case/post/delete_image_use_case.dart';
+import 'package:flutter_post_blog/domain/use_case/post/upload_image_use_case.dart';
 import 'package:get_it/get_it.dart';
 
 import 'core/utils/app_bloc_observer.dart';
@@ -90,7 +92,10 @@ class MainApp extends StatelessWidget {
               ),
             ),
             BlocProvider(
-              create: (_) => ImagePickerBloc(),
+              create: (_) => ImagePickerBloc(
+                GetIt.instance.get<UploadImageUseCase>(),
+                GetIt.instance.get<DeleteImageUseCase>(),
+              ),
             ),
           ],
           child: child ?? const SizedBox.shrink(),

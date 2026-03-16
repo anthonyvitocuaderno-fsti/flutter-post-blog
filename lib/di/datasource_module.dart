@@ -8,7 +8,7 @@ import '../data/datasource/remote/auth_remote_datasource.dart';
 import '../data/datasource/remote/auth_remote_datasource_impl.dart';
 import '../data/datasource/remote/post_remote_datasource.dart';
 import '../data/datasource/remote/post_remote_datasource_impl.dart';
-import '../service/firebase_auth_service.dart';
+import '../core/services/firebase_auth_service.dart';
 
 void setupDataSources() {
   final getIt = GetIt.instance;
